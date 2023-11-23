@@ -7,6 +7,7 @@
     "strict": true,
     "target": "esnext",
     "noEmit": true,
+    "noUnusedLocals": false,
     "paths": {
       "@/*": ["./src/*"]
     }

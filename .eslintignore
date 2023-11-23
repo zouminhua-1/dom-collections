@@ -1,0 +1,13 @@
+node_modules
+
+# lock
+package-lock.json
+yarn.lock
+
+# compress
+*.rar
+*.zip
+*.7z
+
+# output
+dist
