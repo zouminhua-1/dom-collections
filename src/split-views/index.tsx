@@ -3,26 +3,34 @@ import "./index.scss";
 
 const SplitViews = () => {
   useEffect(() => {
-    document.querySelectorAll(".resizer").forEach(function (ele) {
+    document.querySelectorAll(".resizer").forEach(function (ele: any) {
       resizable(ele);
     });
   }, []);
 
-  function resizable(resizer) {
-    function handleMouseDown(e) {
+  function resizable(resizer: HTMLDivElement) {
+    if (!resizer) return;
+    function handleMouseDown(e: MouseEvent) {
       const startPos = {
         x: e.clientX,
         y: e.clientY,
       };
       const direction = resizer.getAttribute("data-direction") || "horizontal";
-      const prevSibling = resizer.previousElementSibling;
-      const nextSibling = resizer.nextElementSibling;
+      const prevSibling = resizer.previousElementSibling as HTMLDivElement;
+      const nextSibling = resizer.nextElementSibling as HTMLDivElement;
+      if (
+        !prevSibling ||
+        !nextSibling ||
+        !prevSibling.parentElement ||
+        !prevSibling.parentElement
+      )
+        return;
       const prevSiblingWidth = prevSibling.getBoundingClientRect().width;
       const w = prevSibling.parentElement.getBoundingClientRect().width;
       const prevSiblingHeight = prevSibling.getBoundingClientRect().height;
       const h = prevSibling.parentElement.getBoundingClientRect().height;
 
-      const handleMouseMove = (e) => {
+      const handleMouseMove = (e: MouseEvent) => {
         const dx = e.clientX - startPos.x;
         const dy = e.clientY - startPos.y;
 
@@ -44,7 +52,7 @@ const SplitViews = () => {
         nextSibling.style.pointerEvents = "none";
       };
 
-      const handleMouseUp = (e) => {
+      const handleMouseUp = (e: MouseEvent) => {
         resizer.style.removeProperty("cursor");
         document.body.style.removeProperty("cursor");
 
