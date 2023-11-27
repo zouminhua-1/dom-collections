@@ -9,7 +9,7 @@ const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
     useClickToSelect();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const previewImageRef = useRef<HTMLImageElement>(null);
+
   const originalImageRef = useRef<HTMLImageElement>(null);
   const croppingAreaRef = React.useRef({});
   const [draggableRef, dragX, dragY, setOffset] = useDraggable();
@@ -37,19 +37,13 @@ const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
 
   const handleImageLoad = (e: any) => {
     const container = containerRef.current;
-    const previewImage = previewImageRef.current;
     if (!container) {
       return;
     }
+
     const naturalWidth = e.target.naturalWidth;
     const naturalHeight = e.target.naturalHeight;
     const ratio = naturalWidth / naturalHeight;
-
-    const containerWidth = container.getBoundingClientRect().width;
-    container.style.height = `${containerWidth / ratio}px`;
-    e.target.style.width = `${containerWidth}px`;
-    if (!previewImage) return;
-    previewImage.style.width = `${containerWidth}px`;
 
     const imageWidth = container.getBoundingClientRect().width;
     const imageHeight = imageWidth / ratio;
@@ -63,9 +57,10 @@ const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
     if (!img || !croppingArea) {
       return;
     }
+
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    // 缩放比例等于图像的naturalWidth（即原始图像的宽度）除以图像的width（即当前显示的宽度）。
+
     const scale = img.naturalWidth / img.width;
     const croppingRect = croppingArea.getBoundingClientRect();
     const scaledWidth = croppingRect.width * scale;
@@ -78,8 +73,8 @@ const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
     // 图像的源矩形（0、0、scaledWidth和scaledHeight）
     ctx.drawImage(
       img,
-      dx * scale,
-      dy * scale,
+      dragX * scale,
+      dragY * scale,
       scaledWidth,
       scaledHeight,
       0,
@@ -92,6 +87,7 @@ const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
     const link = document.createElement('a');
     link.href = canvas.toDataURL();
     link.download = 'cropped-image.png';
+
     document.body.appendChild(link);
     link.click();
     link.remove();

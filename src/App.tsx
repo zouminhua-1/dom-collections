@@ -9,11 +9,7 @@ import './app.css';
 function App() {
   return (
     <div className="app">
-      {/* <SplitViews /> */}
-      {/* <Croper imgUrl={bgImg} /> */}
-      <div style={{ width: 500, height: 400, margin: '100px auto' }}>
-        <ImageCropper imageUrl={bgImg} />
-      </div>
+      <ImageCropper imageUrl={bgImg} />
     </div>
   );
 }
