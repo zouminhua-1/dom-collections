@@ -1,14 +1,25 @@
-import { useCallback, useEffect, useState } from "react";
-import { clamp } from "@/utils/index";
+import { useCallback, useEffect, useState } from 'react';
+import { clamp } from '@/utils/index';
 
 export enum Selection {
-  None = "None",
-  Clicked = "Clicked",
-  Dragging = "Dragging",
-  Selected = "Selected",
+  None = 'None',
+  Clicked = 'Clicked',
+  Dragging = 'Dragging',
+  Selected = 'Selected',
 }
 
-const useClickToSelect = () => {
+//  ref, dx, dy, startX, startY, selection
+
+type UseClickToSelectReturnType = [
+  (el: HTMLElement) => void,
+  number,
+  number,
+  number,
+  number,
+  Selection,
+];
+
+const useClickToSelect = (): UseClickToSelectReturnType => {
   const [node, setNode] = useState<HTMLElement>();
   const [selection, setSelection] = useState(Selection.None);
   // represent the distance the mouse has been moved horizontally and vertically.
@@ -34,16 +45,17 @@ const useClickToSelect = () => {
       startX: e.clientX - eleRect.left, // width
       startY: e.clientY - eleRect.top, // height
     };
-    // reset the `dx` and `dy` values in the state by calling `setOffset` with an object that contains zeros for both properties.
-    // This ensures that the next time a user starts dragging our new element,
-    // it starts from its original position instead of continuing from where it was left off during the previous drag movement.
-    setOffset({ dx: 0, dy: 0 });
-    setStartPosition(startRelativePos);
 
     const startPos = {
       x: e.clientX,
       y: e.clientY,
     };
+
+    // reset the `dx` and `dy` values in the state by calling `setOffset` with an object that contains zeros for both properties.
+    // This ensures that the next time a user starts dragging our new element,
+    // it starts from its original position instead of continuing from where it was left off during the previous drag movement.
+    setOffset({ dx: 0, dy: 0 });
+    setStartPosition(startRelativePos);
 
     const handleMouseMove = (e: MouseEvent) => {
       setSelection(Selection.Dragging);
@@ -58,12 +70,12 @@ const useClickToSelect = () => {
 
     const handleMouseUp = () => {
       setSelection(Selection.Selected);
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   const handleTouchStart = useCallback(
@@ -75,6 +87,7 @@ const useClickToSelect = () => {
 
       const eleRect = node.getBoundingClientRect();
       const startRelativePos = {
+        // 相对于元素左上角位置
         startX: touch.clientX - eleRect.left,
         startY: touch.clientY - eleRect.top,
       };
@@ -104,35 +117,35 @@ const useClickToSelect = () => {
       };
 
       const handleTouchEnd = () => {
-        document.removeEventListener("touchmove", handleTouchMove);
-        document.removeEventListener("touchend", handleTouchEnd);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
         setSelection(Selection.Selected);
         resetCursor();
       };
 
-      document.addEventListener("touchmove", handleTouchMove);
-      document.addEventListener("touchend", handleTouchEnd);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
     },
-    [node, dx, dy]
+    [node, dx, dy],
   );
 
   const updateCursor = () => {
-    document.body.style.cursor = "crosshair";
-    document.body.style.userSelect = "none";
+    document.body.style.cursor = 'crosshair';
+    document.body.style.userSelect = 'none';
   };
 
   const resetCursor = () => {
-    document.body.style.removeProperty("cursor");
-    document.body.style.removeProperty("user-select");
+    document.body.style.removeProperty('cursor');
+    document.body.style.removeProperty('user-select');
   };
 
   useEffect(() => {
     if (node) {
-      node.addEventListener("mousedown", handleMouseDown);
-      node.addEventListener("touchstart", handleTouchStart);
+      node.addEventListener('mousedown', handleMouseDown);
+      node.addEventListener('touchstart', handleTouchStart);
       return () => {
-        node.removeEventListener("mousedown", handleMouseDown);
-        node.removeEventListener("touchstart", handleTouchStart);
+        node.removeEventListener('mousedown', handleMouseDown);
+        node.removeEventListener('touchstart', handleTouchStart);
       };
     }
   }, [node, dx, dy]);
