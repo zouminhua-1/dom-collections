@@ -1,17 +1,39 @@
-import { useDraggable, useResizeable } from '@/hooks';
-import React, { useRef } from 'react';
+import { useClickToSelect, useDraggable, useResizeable } from '@/hooks';
+import React, { useEffect, useState, useRef } from 'react';
+import { Selection } from '@/hooks/useClickToSelect';
 import './index.scss';
 import { mergeRefs } from '@/utils';
 
 const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
+  const [clickToSelectRef, dx, dy, startX, startY, selection] =
+    useClickToSelect();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const previewImageRef = useRef<HTMLImageElement>(null);
   const originalImageRef = useRef<HTMLImageElement>(null);
   const croppingAreaRef = React.useRef({});
-  const [draggableRef, dx, dy] = useDraggable();
+  const [draggableRef, dragX, dragY, setOffset] = useDraggable();
   const [resizeRef] = useResizeable();
 
-  const mergeRef = mergeRefs([croppingAreaRef, resizeRef, draggableRef]);
+  const containerMergedRef = mergeRefs([containerRef, clickToSelectRef]);
+
+  const croppingMergedRef = mergeRefs([
+    croppingAreaRef,
+    resizeRef,
+    draggableRef,
+  ]);
+
+  const [{ imageWidth, imageHeight }, setImageSize] = useState({
+    imageWidth: 0,
+    imageHeight: 0,
+  });
+
+  useEffect(() => {
+    setOffset({
+      dx: startX,
+      dy: startY,
+    });
+  }, [startX, startY]);
 
   const handleImageLoad = (e: any) => {
     const container = containerRef.current;
@@ -28,6 +50,11 @@ const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
     e.target.style.width = `${containerWidth}px`;
     if (!previewImage) return;
     previewImage.style.width = `${containerWidth}px`;
+
+    const imageWidth = container.getBoundingClientRect().width;
+    const imageHeight = imageWidth / ratio;
+
+    setImageSize({ imageWidth, imageHeight });
   };
 
   const handleSaveImage = () => {
@@ -72,35 +99,61 @@ const ImageCropper = ({ imageUrl }: { imageUrl: string }) => {
 
   return (
     <>
-      <div className="cropper" ref={containerRef}>
-        {/* 图片 */}
+      <div
+        className="cropper"
+        ref={containerMergedRef}
+        style={{
+          width: imageWidth === 0 ? '' : `${imageWidth}px`,
+          height: imageHeight === 0 ? '' : `${imageHeight}px`,
+        }}
+      >
         <div className="cropper__image">
           <img
+            src={imageUrl}
             ref={originalImageRef}
             alt=""
-            src={imageUrl}
             onLoad={handleImageLoad}
+            style={{
+              width: imageWidth === 0 ? '' : `${imageWidth}px`,
+            }}
           />
         </div>
-        {/* 遮罩 */}
         <div className="cropper__overlay" />
-        {/* 裁剪框 */}
-        <div className="cropper__cropping" ref={mergeRef as RefFunc}>
-          {/* 预览图片 */}
-          <div className="cropper__preview">
-            <img
-              src={imageUrl}
-              alt=""
-              ref={previewImageRef}
-              style={{
-                transform: `translate(${-dx}px, ${-dy}px)`,
-              }}
-            />
+        {selection === Selection.Dragging && (
+          <div
+            className="cropper__selection"
+            style={{
+              transform: `translate(${startX}px, ${startY}px)`,
+              width: `${dx}px`,
+              height: `${dy}px`,
+            }}
+          />
+        )}
+        {selection === Selection.Selected && (
+          <div
+            ref={croppingMergedRef}
+            className="cropper__cropping"
+            style={{
+              transform: `translate(${dragX}px, ${dragY}px)`,
+              width: `${dx}px`,
+              height: `${dy}px`,
+            }}
+          >
+            <div className="cropper__preview">
+              <img
+                alt=""
+                src={imageUrl}
+                style={{
+                  transform: `translate(${-dragX}px, ${-dragY}px)`,
+                  width: imageWidth === 0 ? '' : `${imageWidth}px`,
+                }}
+              />
+            </div>
+
+            <div className="resizer resizer--r" />
+            <div className="resizer resizer--b" />
           </div>
-          {/* resizer */}
-          <div className="resizer resizer--r"></div>
-          <div className="resizer resizer--b"></div>
-        </div>
+        )}
       </div>
       <button
         className="cropper__button"

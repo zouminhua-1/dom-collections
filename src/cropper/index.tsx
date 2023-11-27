@@ -3,9 +3,9 @@ import { useClickToSelect, useDraggable } from '@/hooks';
 import { Selection } from '@/hooks/useClickToSelect';
 import './index.scss';
 
-type func = (...args: any[]) => void;
-
-interface Iprops extends HtmlHTMLAttributes<HTMLDivElement> {}
+interface Iprops extends HtmlHTMLAttributes<HTMLDivElement> {
+  imgUrl: string;
+}
 
 const Croper = (props: Iprops) => {
   const [clickToSelectRef, dx, dy, startX, startY, selection] =
@@ -18,7 +18,7 @@ const Croper = (props: Iprops) => {
   }, [startX, startY]);
 
   return (
-    <div className="image-crop-container" ref={clickToSelectRef as func}>
+    <div className="image-crop-container" ref={clickToSelectRef as RefFunc}>
       {selection === Selection.Dragging && (
         <div
           className="selection"
@@ -31,7 +31,7 @@ const Croper = (props: Iprops) => {
       )}
       {selection === Selection.Selected && (
         <div
-          ref={draggableRef as func}
+          ref={draggableRef as RefFunc}
           className="draggable"
           style={{
             width: `${dx}px`,

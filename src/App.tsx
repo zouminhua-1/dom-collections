@@ -10,7 +10,7 @@ function App() {
   return (
     <div className="app">
       {/* <SplitViews /> */}
-      {/* <ResizeElement /> */}
+      {/* <Croper imgUrl={bgImg} /> */}
       <div style={{ width: 500, height: 400, margin: '100px auto' }}>
         <ImageCropper imageUrl={bgImg} />
       </div>
